@@ -10,3 +10,5 @@ Pattern: Andrej Karpathy's LLM Wiki (raw files → wiki pages Claude maintains �
 
 Use it: **Use this template → Create a new repository → Private**. Publish with Cloudflare Pages (no build command, output `/`) behind Cloudflare Access.
 Made by Ido Azaria for his private lessons.
+
+**No Zero Trust?** `functions/_middleware.js` is a simple password lock, off by default. Turn it on: Cloudflare → your Pages project → Settings → Variables and secrets → Add → Type **Secret**, name `HUB_PASSWORD`, your password → Save, then redeploy.
