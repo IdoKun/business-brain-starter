@@ -1,0 +1,21 @@
+/* hub/brand.css: the look of your hub. Claude changes THIS file for design requests.
+   Colors are "hex codes" (#1f5f55). First block = light mode, second = dark mode. */
+:root{
+  --bg:#f6f7f4;      /* page background */
+  --card:#ffffff;    /* boxes */
+  --ink:#1d2321;     /* text */
+  --muted:#5d6763;   /* small grey text */
+  --line:#dfe3df;    /* borders */
+  --accent:#1f5f55;  /* links, buttons, chart bars: your main brand color */
+  --hit:#fff3b0;     /* search highlight */
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --logo: "🧠";       /* the sign before the title */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141917; --card:#1d2421; --ink:#e8ece9; --muted:#9aa5a0; --line:#2e3833; --accent:#7fc4b6; --hit:#4a4320;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141917; --card:#1d2421; --ink:#e8ece9; --muted:#9aa5a0; --line:#2e3833; --accent:#7fc4b6; --hit:#4a4320;
+}

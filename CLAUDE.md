@@ -23,6 +23,11 @@ You are working in my business brain. Read this file first, every session.
 - No customer names, emails or phone numbers in the wiki. Write "a family of 4", "a company in Berlin".
 - Never put passwords, keys or card numbers in any file.
 
+## Design of my hub
+- For look-and-feel requests (colors, font, logo, dark mode), change **only `hub/brand.css`**, unless I ask for a new feature.
+- Never break the search, the page list or the dashboard. After a change, tell me what to look at.
+- If I say "undo the last design change", go back to the previous version of `hub/brand.css` (Git keeps it).
+
 ## My skills
 - `add-to-brain`: add a new file from my Drive to the wiki.
 - `check-brain`: find contradictions, old facts and missing pages.

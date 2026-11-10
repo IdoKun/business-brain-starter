@@ -12,5 +12,8 @@ Start here. Every page, one line each. Claude keeps this list up to date.
 ## How it's going
 - [Open questions](open-questions.md) — things that don't match, to fix
 
+## Using my brain
+- [Make it yours](make-it-yours.md) — how to ask Claude for colors, fonts, logo, dark mode
+
 ## Log
 - [What changed](log.md) — newest first

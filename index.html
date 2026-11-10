@@ -6,10 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <title>My business brain</title>
 <style>
-:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2321;--muted:#5d6763;--line:#dfe3df;--accent:#1f5f55;--hit:#fff3b0}
-@media (prefers-color-scheme:dark){:root{--bg:#141917;--card:#1d2421;--ink:#e8ece9;--muted:#9aa5a0;--line:#2e3833;--accent:#7fc4b6;--hit:#4a4320}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--font)}
 header{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px}
 .top{max-width:1100px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .top h1{font-size:19px;margin:0 12px 0 0;white-space:nowrap}
@@ -37,13 +35,17 @@ mark{background:var(--hit);color:inherit;border-radius:3px}
 .muted{color:var(--muted)}
 .drive{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:9px;border:1px solid var(--line);color:var(--accent);text-decoration:none}
 svg text{fill:var(--muted);font-size:12px}
+.logo::before{content:var(--logo)}
+#theme{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:6px 10px;cursor:pointer}
 </style>
+<link rel="stylesheet" href="hub/brand.css">
 </head>
 <body>
 <header><div class="top">
-  <h1><a href="#">🧠 My business brain</a></h1>
+  <h1><a href="#"><span class="logo"></span> My business brain</a></h1>
   <input id="q" type="search" placeholder="Search everything… (typos are OK)" autocomplete="off" aria-label="Search">
   <nav class="tabs"><a href="#">Home</a><a href="#dashboard">Dashboard</a></nav>
+  <button id="theme" type="button" title="Light / dark">◐</button>
 </div></header>
 <main>
   <aside id="side"><h2>Pages</h2><ul id="list"><li class="muted">Loading…</li></ul></aside>
@@ -145,6 +147,14 @@ let timer;
 $('#q').addEventListener('input', e => { clearTimeout(timer); const q = e.target.value.trim();
   timer = setTimeout(() => { if (q.length >= 2) { history.replaceState(null,'','#q='+encodeURIComponent(q)); showSearch(q); } else if (!q) { history.replaceState(null,'','#'); route(); } }, 150); });
 window.addEventListener('hashchange', route);
+// Light / dark: follows the device; the ◐ button switches and remembers it on this computer.
+const root = document.documentElement;
+try { const t = localStorage.getItem('theme'); if (t) root.dataset.theme = t; } catch(e){}
+$('#theme').addEventListener('click', () => {
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', root.dataset.theme); } catch(e){}
+});
 load().catch(e => { $('#view').innerHTML = '<h1>Something is off</h1><p class="muted">'+esc(e.message)+'</p><p>Ask Claude: “My hub shows an error, please check wiki/index.md.”</p>'; });
 </script>
 </body>
