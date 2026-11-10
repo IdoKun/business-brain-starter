@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>My business brain</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2321;--muted:#5d6763;--line:#dfe3df;--accent:#1f5f55;--hit:#fff3b0}
+@media (prefers-color-scheme:dark){:root{--bg:#141917;--card:#1d2421;--ink:#e8ece9;--muted:#9aa5a0;--line:#2e3833;--accent:#7fc4b6;--hit:#4a4320}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px}
+.top{max-width:1100px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:19px;margin:0 12px 0 0;white-space:nowrap}
+.top h1 a{color:inherit;text-decoration:none}
+#q{flex:1;min-width:220px;font:inherit;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+#q:focus{outline:none;border-color:var(--accent)}
+nav.tabs a{margin-right:14px;color:var(--accent);font-weight:600;text-decoration:none}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:20px}
+@media (max-width:760px){main{grid-template-columns:1fr}#side{order:2}}
+#side,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+#side h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:4px 0 8px}
+#side ul{list-style:none;margin:0 0 12px;padding:0}
+#side li a{display:block;padding:5px 8px;border-radius:8px;color:var(--ink);text-decoration:none}
+#side li a:hover,#side li a.on{background:var(--bg);color:var(--accent)}
+#side small{display:block;color:var(--muted);font-size:13px;line-height:1.3}
+.page h1{margin-top:0;font-size:28px}
+.page a{color:var(--accent)}
+.page table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px}
+.page th,.page td{border:1px solid var(--line);padding:6px 8px;text-align:left}
+.page code{background:var(--bg);padding:1px 5px;border-radius:5px}
+.results .r{padding:10px 0;border-bottom:1px solid var(--line)}
+.results .r a{font-weight:700;color:var(--accent);text-decoration:none;font-size:18px}
+.results .r p{margin:4px 0 0;color:var(--muted)}
+mark{background:var(--hit);color:inherit;border-radius:3px}
+.muted{color:var(--muted)}
+.drive{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:9px;border:1px solid var(--line);color:var(--accent);text-decoration:none}
+svg text{fill:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header><div class="top">
+  <h1><a href="#">🧠 My business brain</a></h1>
+  <input id="q" type="search" placeholder="Search everything… (typos are OK)" autocomplete="off" aria-label="Search">
+  <nav class="tabs"><a href="#">Home</a><a href="#dashboard">Dashboard</a></nav>
+</div></header>
+<main>
+  <aside id="side"><h2>Pages</h2><ul id="list"><li class="muted">Loading…</li></ul></aside>
+  <section id="view" class="card page"><p class="muted">Loading…</p></section>
+</main>
+<script src="hub/marked.min.js"></script>
+<script src="hub/minisearch.min.js"></script>
+<script>
+// The hub reads wiki/index.md, follows every link to a .md page in it, and builds search from them.
+// Claude keeps wiki/index.md up to date, so a new page shows up here by itself.
+const pages = {};            // file -> {file,title,summary,text}
+let order = [], search;
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function get(path){ const r = await fetch(path, {cache:'no-cache'}); if(!r.ok) throw new Error(path+' '+r.status); return r.text(); }
+
+async function load(){
+  const idx = await get('wiki/index.md');
+  pages['index.md'] = {file:'index.md', title:'Home', summary:'', text:idx};
+  // every "[Title](file.md) — summary" line in the index is a page
+  for (const line of idx.split('\n')){
+    const m = line.match(/\[([^\]]+)\]\(([^)\s]+\.md)\)\s*[—–:-]?\s*(.*)$/);
+    if (m && !pages[m[2]]) { pages[m[2]] = {file:m[2], title:m[1], summary:m[3].trim(), text:''}; order.push(m[2]); }
+  }
+  await Promise.all(order.map(async f => { try { pages[f].text = await get('wiki/'+f); } catch(e){ pages[f].text = '_This page is listed in the index but the file is missing._'; } }));
+  // Typos: each word is also stored with its letters sorted, so swapped letters ("pirce" = "price") still match,
+  // and longer words may have 1–2 wrong letters.
+  const sorted = w => w.split('').sort().join('');
+  const terms = t => { t = t.toLowerCase(); return t.length > 3 ? [t, '~' + sorted(t)] : [t]; };
+  search = new MiniSearch({fields:['title','summary','text'], storeFields:['title','summary'], idField:'file',
+    processTerm: terms,
+    searchOptions:{boost:{title:3, summary:2}, prefix: t => !t.startsWith('~'),
+      fuzzy: t => t.startsWith('~') ? 0 : (t.length < 4 ? 0 : t.length < 6 ? 1 : 2), combineWith:'OR'}});
+  search.addAll(order.map(f => pages[f]));
+  $('#list').innerHTML = order.map(f => `<li><a href="#p=${encodeURIComponent(f)}" data-f="${esc(f)}">${esc(pages[f].title)}<small>${esc(pages[f].summary)}</small></a></li>`).join('');
+  route();
+}
+
+function render(md){
+  const html = marked.parse(md);
+  const d = document.createElement('div'); d.innerHTML = html;
+  d.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (/^[^:]+\.md$/.test(h)) a.setAttribute('href', '#p='+encodeURIComponent(h.replace(/^\.\//,'')));
+    else if (/^https?:/.test(h)) { a.target = '_blank'; a.rel = 'noopener'; }
+  });
+  return d.innerHTML;
+}
+
+function snippet(text, terms){
+  const t = text.replace(/\]\([^)]*\)/g,']').replace(/[#*_`>|\[\]()]/g,' ').replace(/\s+/g,' ');
+  const low = t.toLowerCase(); let at = -1;
+  for (const w of terms){ at = low.indexOf(w.toLowerCase()); if (at >= 0) break; }
+  let s = at < 0 ? t.slice(0,160) : (at > 60 ? '…' : '') + t.slice(Math.max(0,at-60), at+120) + '…';
+  s = esc(s);
+  for (const w of terms) if (w.length > 1 && !w.startsWith('~')) s = s.replace(new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<mark>$1</mark>');
+  return s;
+}
+
+function showSearch(q){
+  const hits = search.search(q);
+  const drive = 'https://drive.google.com/drive/search?q=' + encodeURIComponent(q);
+  $('#view').innerHTML = `<h1>Search: “${esc(q)}”</h1>` + (hits.length
+    ? `<div class="results">${hits.slice(0,20).map(h => `<div class="r"><a href="#p=${encodeURIComponent(h.id)}">${esc(h.title)}</a><p>${snippet(pages[h.id].text, h.terms)}</p></div>`).join('')}</div>`
+    : `<p class="muted">Nothing in your brain matches. Try fewer words.</p>`)
+    + `<a class="drive" href="${drive}" target="_blank" rel="noopener">Not here? Search inside your Google Drive →</a>`;
+}
+
+async function showDashboard(){
+  let csv; try { csv = await get('data/metrics.csv'); } catch(e){ $('#view').innerHTML = '<h1>Dashboard</h1><p class="muted">No numbers yet. Run your booking check, then ask Claude to update the dashboard.</p>'; return; }
+  const rows = csv.trim().split('\n').map(l => l.split(',').map(c => c.trim()));
+  const head = rows.shift();
+  let out = '<h1>Dashboard</h1><p class="muted">Your numbers, month by month. Claude updates this after each booking check.</p>';
+  out += '<table><tr>' + head.map(h => `<th>${esc(h)}</th>`).join('') + '</tr>' + rows.map(r => '<tr>' + r.map(c => `<td>${esc(c)}</td>`).join('') + '</tr>').join('') + '</table>';
+  for (let col = 1; col < head.length; col++){
+    const vals = rows.map(r => parseFloat(r[col]));
+    if (vals.every(isNaN)) continue;
+    const max = Math.max(1, ...vals.filter(v => !isNaN(v))), W = 46, H = 120;
+    out += `<h3>${esc(head[col])}</h3><svg viewBox="0 0 ${rows.length*W+10} ${H+30}" width="100%" style="max-width:${rows.length*W+10}px" role="img" aria-label="${esc(head[col])} per month">`
+      + rows.map((r,i) => { const v = vals[i]; const h = isNaN(v) ? 0 : Math.round(v/max*H);
+          return `<rect x="${i*W+8}" y="${H-h+4}" width="${W-14}" height="${h}" rx="4" fill="var(--accent)"></rect><text x="${i*W+8}" y="${H+20}">${esc(r[0].slice(0,7))}</text><text x="${i*W+8}" y="${H-h}">${isNaN(v)?'–':v}</text>`; }).join('')
+      + '</svg>';
+  }
+  $('#view').innerHTML = out;
+}
+
+function route(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  document.querySelectorAll('#list a').forEach(a => a.classList.toggle('on', 'p='+a.dataset.f === h));
+  if (h === 'dashboard') return showDashboard();
+  if (h.startsWith('p=')){ const f = h.slice(2); const p = pages[f];
+    $('#view').innerHTML = p ? render(p.text) : '<h1>Not found</h1><p class="muted">This page isn’t in the index yet.</p>'; window.scrollTo(0,0); return; }
+  if (h.startsWith('q=')) return showSearch(h.slice(2));
+  $('#view').innerHTML = render(pages['index.md'].text);
+}
+
+let timer;
+$('#q').addEventListener('input', e => { clearTimeout(timer); const q = e.target.value.trim();
+  timer = setTimeout(() => { if (q.length >= 2) { history.replaceState(null,'','#q='+encodeURIComponent(q)); showSearch(q); } else if (!q) { history.replaceState(null,'','#'); route(); } }, 150); });
+window.addEventListener('hashchange', route);
+load().catch(e => { $('#view').innerHTML = '<h1>Something is off</h1><p class="muted">'+esc(e.message)+'</p><p>Ask Claude: “My hub shows an error, please check wiki/index.md.”</p>'; });
+</script>
+</body>
+</html>
