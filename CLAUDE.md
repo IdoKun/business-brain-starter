@@ -55,3 +55,4 @@ An older file that says something else is **out of date, not an open question**.
 - `add-to-brain`: add a new file from my Drive to the wiki.
 - `check-brain`: find contradictions, old facts and missing pages.
 - `update-dashboard`: put this month's numbers into `data/metrics.csv`.
+- `update-brain-rules`: bring new rules and skills from the starter in, keeping mine ("update my brain rules").
