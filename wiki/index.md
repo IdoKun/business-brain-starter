@@ -13,6 +13,7 @@ Start here. Every page, one line each. Claude keeps this list up to date.
 - [Open questions](open-questions.md) — things that don't match, to fix
 
 ## Using my brain
+- [Pick up here](handoff.md) — where the last Claude session stopped and what's next; written by close-session
 - [My instructions](my-instructions.md) — everything I told Claude, newest first; Claude reads it first
 - [Make it yours](make-it-yours.md) — how to ask Claude for colors, fonts, logo, dark mode
 
