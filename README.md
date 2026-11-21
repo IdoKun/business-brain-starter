@@ -6,7 +6,7 @@ Pattern: Andrej Karpathy's LLM Wiki (raw files → wiki pages Claude maintains �
 - `wiki/`: the pages (examples: a made-up yoga studio). `wiki/index.md` lists every page; the hub reads it.
 - `data/metrics.csv`: monthly numbers for the dashboard.
 - `index.html` + `hub/`: the hub: read, fuzzy search (typos OK), dashboard. No build step.
-- `CLAUDE.md`: the rules Claude reads first. `.claude/skills/`: add-to-brain, check-brain, update-dashboard, update-brain-rules, open-session, close-session, refresh, plan-big-job. `.claude/agents/checker.md`: checks drafts and changes before they reach anyone.
+- `CLAUDE.md`: the rules Claude reads first. `.claude/skills/`: add-to-brain, check-brain, update-dashboard, update-brain-rules, open-session, close-session, refresh, go, plan-big-job. `.claude/agents/checker.md`: checks drafts and changes before they reach anyone.
 
 Use it: **Use this template → Create a new repository → Private**. Then publish it on Cloudflare, locked to your email: see **Publish your hub on Cloudflare** below.
 Made by Ido Azaria for his private lessons.
