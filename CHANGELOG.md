@@ -2,6 +2,9 @@
 
 What changed in the starter. Brains made from it can bring changes in with the skill `update-brain-rules` ("update my brain rules"). Newest first.
 
+## v3.1 (21 Nov 2026)
+- New skill `go`: finish a change properly (say what changed, check it against the brief, prove it works, ask, then save). Pairs with open-session / close-session / refresh.
+
 ## 2026-11-18 · v3: memory between sessions, a checker, big jobs
 - New page `wiki/handoff.md` (+ its line in `wiki/index.md`): where the last session stopped. `CLAUDE.md` → Start of every session reads it first, and says why (each Code session is a new Claude).
 - New skills `.claude/skills/open-session/`, `.claude/skills/close-session/`, `.claude/skills/refresh/`.
